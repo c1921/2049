@@ -36,6 +36,7 @@ export default defineComponent({
   },
   setup(props) {
     const dialogueTree = ref<Record<string, DialogueNode>>({});
+    const conditionValue = ref(0); // 定义条件变量
     const { messages, currentNode, isWaiting, isUserSending, sendMessages } = useChat(dialogueTree.value);
 
     onMounted(() => {
@@ -51,14 +52,29 @@ export default defineComponent({
       }
     });
 
+    const resolveNextNodeId = (optionNextId: string): string => {
+      const node = dialogueTree.value[optionNextId];
+
+      if (node && node.conditions) {
+        for (const condition of node.conditions) {
+          if (condition.check(conditionValue.value)) {
+            return condition.nextId;
+          }
+        }
+      }
+
+      return optionNextId;
+    };
+
     const selectOptionHandler = (optionIndex: number) => {
       if (!currentNode.value || !currentNode.value.options) return;
 
       const option = currentNode.value.options[optionIndex];
+      const nextNodeId = resolveNextNodeId(option.nextId);
 
       sendMessages(option.text, 'user', () => {
         setTimeout(() => {
-          const nextNode = dialogueTree.value![option.nextId];
+          const nextNode = dialogueTree.value![nextNodeId];
           currentNode.value = nextNode;
 
           sendMessages(nextNode.text, 'bot', () => {
