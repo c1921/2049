@@ -11,11 +11,7 @@
           <div class="chat-message-body">{{ message.text }}</div>
         </div>
         <!-- 等待动画，仅在NPC回复时显示 -->
-        <div v-if="isWaiting && !isUserSending" class="waiting-dots">
-          <div></div>
-          <div></div>
-          <div></div>
-        </div>
+        <WaitingDots v-if="isWaiting && !isUserSending" />
       </div>
     </div>
     <div v-if="currentNode.options" class="options-box">
@@ -36,8 +32,12 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import dialogueTree, { DialogueNode, DialogueOption } from '../dialogueTree';
+import WaitingDots from '../components/WaitingDots.vue';  // 导入等待动画组件
 
 export default defineComponent({
+  components: {
+    WaitingDots,  // 注册等待动画组件
+  },
   setup() {
     const messages = ref<{ id: number; sender: string; text: string; timestamp: Date }[]>([]);
     const currentNode = ref<DialogueNode>(dialogueTree['root']);
@@ -129,6 +129,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
+/* 原样式代码保持不变 */
 .chat-container {
   max-width: 600px;
   margin: 0 auto;
@@ -198,45 +199,5 @@ export default defineComponent({
 .button {
   flex: 1;
   margin: 0.25rem;
-}
-
-/* 等待动画样式 */
-.waiting-dots {
-  display: flex;
-  justify-content: flex-start; /* 修改为靠左对齐 */
-  align-items: center;
-  margin-top: 10px;
-  height: 20px;
-  padding-left: 1rem; /* 添加左边距使其与消息内容对齐 */
-}
-
-.waiting-dots div {
-  width: 8px;
-  height: 8px;
-  margin: 0 4px;
-  background-color: #888;
-  border-radius: 50%;
-  animation: waitingBounce 1.4s infinite both;
-}
-
-.waiting-dots div:nth-child(1) {
-  animation-delay: -0.32s;
-}
-
-.waiting-dots div:nth-child(2) {
-  animation-delay: -0.16s;
-}
-
-.waiting-dots div:nth-child(3) {
-  animation-delay: 0s;
-}
-
-@keyframes waitingBounce {
-  0%, 80%, 100% {
-    transform: scale(0);
-  }
-  40% {
-    transform: scale(1);
-  }
 }
 </style>
