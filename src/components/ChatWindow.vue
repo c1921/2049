@@ -12,49 +12,60 @@
         </div>
       </div>
     </div>
-    <div class="input-box">
-      <input
-        v-model="newMessage"
-        @keyup.enter="sendMessage"
-        type="text"
-        class="input"
-        placeholder="Type a message..."
-      />
+    <div v-if="currentNode.options" class="options-box">
+      <div class="buttons">
+        <button
+          v-for="(option, index) in currentNode.options"
+          :key="index"
+          class="button is-primary"
+          @click="selectOption(option)"
+        >
+          {{ option.text }}
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
+import dialogueTree, { DialogueNode, DialogueOption } from '../dialogueTree';
 
 export default defineComponent({
   setup() {
-    const messages = ref([
-      { id: 1, sender: 'bot', text: 'Hello! How can I help you today?', timestamp: new Date() },
-    ]);
-    const newMessage = ref('');
+    const messages = ref<{ id: number; sender: string; text: string; timestamp: Date }[]>([]);
+    const currentNode = ref<DialogueNode>(dialogueTree['root']);
 
-    const sendMessage = () => {
-      if (newMessage.value.trim() !== '') {
-        messages.value.push({
-          id: Date.now(),
-          sender: 'user',
-          text: newMessage.value.trim(),
-          timestamp: new Date(),
-        });
-        newMessage.value = '';
-
-        // 模拟机器人回复
-        setTimeout(() => {
-          messages.value.push({
-            id: Date.now(),
-            sender: 'bot',
-            text: 'This is a bot response.',
-            timestamp: new Date(),
-          });
-        }, 1000);
-      }
+    const addMessage = (sender: string, text: string) => {
+      messages.value.push({
+        id: Date.now(),
+        sender,
+        text,
+        timestamp: new Date(),
+      });
     };
+
+    const selectOption = (option: DialogueOption) => {
+      addMessage('user', option.text);
+
+      setTimeout(() => {
+        const nextNode = dialogueTree[option.nextId];
+        currentNode.value = nextNode;
+        addMessage('bot', nextNode.text);
+        
+        // 如果没有选项并且有next属性，自动跳转到下一个节点
+        if (!nextNode.options && nextNode.next) {
+          setTimeout(() => {
+            const nextNextNode = dialogueTree[nextNode.next as string];
+            currentNode.value = nextNextNode;
+            addMessage('bot', nextNextNode.text);
+          }, 1000);
+        }
+      }, 1000);
+    };
+
+    // 初始化对话
+    addMessage('bot', currentNode.value.text);
 
     const formatTimestamp = (timestamp: Date) => {
       const options: Intl.DateTimeFormatOptions = {
@@ -68,8 +79,8 @@ export default defineComponent({
 
     return {
       messages,
-      newMessage,
-      sendMessage,
+      currentNode,
+      selectOption,
       formatTimestamp,
     };
   },
@@ -128,5 +139,23 @@ export default defineComponent({
 .is-user .chat-message-body {
   background-color: #48c774;
   color: white;
+}
+
+.options-box {
+  padding: 1rem;
+  border-top: 1px solid #ddd;
+  display: flex;
+  justify-content: center;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.button {
+  flex: 1;
+  margin: 0.25rem;
 }
 </style>
