@@ -1,5 +1,9 @@
 <template>
   <div class="chat-container">
+    <div class="header">
+      <button @click="$emit('back')" class="back-button">Back</button>
+      <h2>{{ contact.name }}</h2>
+    </div>
     <div class="chat-box">
       <div class="messages">
         <div
@@ -10,19 +14,18 @@
           <div class="chat-message-time">{{ formatTimestamp(message.timestamp) }}</div>
           <div class="chat-message-body">{{ message.text }}</div>
         </div>
-        <!-- 等待动画，仅在NPC回复时显示 -->
         <WaitingDots v-if="isWaiting && !isUserSending" />
       </div>
     </div>
-    <div v-if="currentNode.options" class="options-box">
+    <div v-if="currentNode && currentNode.options" class="options-box">
       <div class="buttons">
         <button
           v-for="(option, index) in currentNode.options"
           :key="index"
           class="button is-primary"
-          @click="selectOption(option)"
+          @click="selectOption(index)"
         >
-          {{ option.text[0] }} <!-- 显示选项的第一句以代表整个选项 -->
+          {{ option.text[0] }}
         </button>
       </div>
     </div>
@@ -30,21 +33,42 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-import dialogueTree, { DialogueNode, DialogueOption } from '../dialogueTree';
-import WaitingDots from '../components/WaitingDots.vue';  // 导入等待动画组件
+import { defineComponent, ref, onMounted, PropType } from 'vue';
+import { DialogueNode } from '../types';
+import WaitingDots from '../components/WaitingDots.vue';
+import dialogueAlice from '../dialogueAlice';
+import dialogueBob from '../dialogueBob';
 
 export default defineComponent({
   components: {
-    WaitingDots,  // 注册等待动画组件
+    WaitingDots,
   },
-  setup() {
+  props: {
+    contact: {
+      type: Object as PropType<{ id: number; name: string }>,
+      required: true,
+    },
+  },
+  setup(props) {
     const messages = ref<{ id: number; sender: string; text: string; timestamp: Date }[]>([]);
-    const currentNode = ref<DialogueNode>(dialogueTree['root']);
+    const currentNode = ref<DialogueNode | null>(null);
     const isWaiting = ref(false);
     const isUserSending = ref(false);
-    const typingSpeed = 5; // 假设打字速度为每秒5个字符
-    const userMessageDelay = 500; // 玩家消息的固定延迟
+    const typingSpeed = 5;
+    const userMessageDelay = 500;
+    const dialogueTree = ref<Record<string, DialogueNode>>({});
+
+    onMounted(() => {
+      if (props.contact.name === 'Alice') {
+        dialogueTree.value = dialogueAlice;
+      } else if (props.contact.name === 'Bob') {
+        dialogueTree.value = dialogueBob;
+      }
+      currentNode.value = dialogueTree.value['root'] || null; // 如果没有找到 'root' 节点，currentNode 将为 null
+      if (currentNode.value) {
+        sendMessages(currentNode.value.text, 'bot');
+      }
+    });
 
     const addMessage = (sender: string, text: string) => {
       messages.value.push({
@@ -61,7 +85,7 @@ export default defineComponent({
       callback?: () => void,
       constantDelay = false
     ) => {
-      isWaiting.value = sender === 'bot'; // 仅在NPC消息发送时显示动画
+      isWaiting.value = sender === 'bot';
       isUserSending.value = sender === 'user';
 
       texts.reduce((promiseChain, text, index) => {
@@ -83,28 +107,28 @@ export default defineComponent({
       });
     };
 
-    const selectOption = (option: DialogueOption) => {
+    const selectOption = (optionIndex: number) => {
+      if (!currentNode.value || !currentNode.value.options) return;
+
+      const option = currentNode.value.options[optionIndex];
+
       sendMessages(option.text, 'user', () => {
         setTimeout(() => {
-          const nextNode = dialogueTree[option.nextId];
+          const nextNode = dialogueTree.value![option.nextId];
           currentNode.value = nextNode;
 
           sendMessages(nextNode.text, 'bot', () => {
-            // 如果没有选项并且有next属性，自动跳转到下一个节点
             if (!nextNode.options && nextNode.next) {
               setTimeout(() => {
-                const nextNextNode = dialogueTree[nextNode.next as string];
+                const nextNextNode = dialogueTree.value![nextNode.next as string];
                 currentNode.value = nextNextNode;
                 sendMessages(nextNextNode.text, 'bot');
               }, 1000);
             }
           });
         }, 1000);
-      }, true); // 传入 true 以使用固定延迟
+      }, true);
     };
-
-    // 初始化对话
-    sendMessages(currentNode.value.text, 'bot');
 
     const formatTimestamp = (timestamp: Date) => {
       const options: Intl.DateTimeFormatOptions = {
@@ -129,7 +153,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* 原样式代码保持不变 */
+/* 原有样式 */
 .chat-container {
   max-width: 600px;
   margin: 0 auto;
@@ -139,6 +163,23 @@ export default defineComponent({
   border: 1px solid #ddd;
   border-radius: 10px;
   overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #48c774;
+  color: white;
+}
+
+.back-button {
+  margin-right: 10px;
+  background-color: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
 }
 
 .chat-box {
