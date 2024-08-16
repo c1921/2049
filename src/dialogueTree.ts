@@ -1,8 +1,6 @@
-// src/dialogueTree.ts
-
 export interface DialogueNode {
     id: string;
-    text: string;
+    text: string[]; // 由字符串数组表示的多句回复
     options?: DialogueOption[];
     next?: string;
 }
@@ -15,7 +13,7 @@ export interface DialogueOption {
 const dialogueTree: Record<string, DialogueNode> = {
     root: {
         id: 'root',
-        text: 'Hello, adventurer! What brings you here?',
+        text: ['Hello, adventurer!', 'What brings you here?'],
         options: [
             { text: 'I am here for a quest.', nextId: 'quest' },
             { text: 'Just passing by.', nextId: 'passBy' },
@@ -23,7 +21,7 @@ const dialogueTree: Record<string, DialogueNode> = {
     },
     quest: {
         id: 'quest',
-        text: 'A quest, you say? What kind of quest?',
+        text: ['A quest, you say?', 'What kind of quest?'],
         options: [
             { text: 'A dangerous one.', nextId: 'dangerousQuest' },
             { text: 'A simple task.', nextId: 'simpleQuest' },
@@ -31,17 +29,17 @@ const dialogueTree: Record<string, DialogueNode> = {
     },
     passBy: {
         id: 'passBy',
-        text: 'Safe travels, then!',
+        text: ['Safe travels, then!'],
         next: 'root',
     },
     dangerousQuest: {
         id: 'dangerousQuest',
-        text: 'Ah, a brave soul! Take this sword for your journey.',
+        text: ['Ah, a brave soul!', 'Take this sword for your journey.'],
         next: 'root',
     },
     simpleQuest: {
         id: 'simpleQuest',
-        text: 'Here, take this map and find the hidden treasure.',
+        text: ['Here, take this map', 'and find the hidden treasure.'],
         next: 'root',
     },
 };

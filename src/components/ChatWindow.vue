@@ -45,27 +45,39 @@ export default defineComponent({
       });
     };
 
+    const sendBotMessages = (texts: string[], callback?: () => void) => {
+      texts.forEach((text, index) => {
+        setTimeout(() => {
+          addMessage('bot', text);
+          if (callback && index === texts.length - 1) {
+            callback();
+          }
+        }, index * 1000); // 每句间隔1秒
+      });
+    };
+
     const selectOption = (option: DialogueOption) => {
       addMessage('user', option.text);
 
       setTimeout(() => {
         const nextNode = dialogueTree[option.nextId];
         currentNode.value = nextNode;
-        addMessage('bot', nextNode.text);
-        
-        // 如果没有选项并且有next属性，自动跳转到下一个节点
-        if (!nextNode.options && nextNode.next) {
-          setTimeout(() => {
-            const nextNextNode = dialogueTree[nextNode.next as string];
-            currentNode.value = nextNextNode;
-            addMessage('bot', nextNextNode.text);
-          }, 1000);
-        }
+
+        sendBotMessages(nextNode.text, () => {
+          // 如果没有选项并且有next属性，自动跳转到下一个节点
+          if (!nextNode.options && nextNode.next) {
+            setTimeout(() => {
+              const nextNextNode = dialogueTree[nextNode.next as string];
+              currentNode.value = nextNextNode;
+              sendBotMessages(nextNextNode.text);
+            }, 1000);
+          }
+        });
       }, 1000);
     };
 
     // 初始化对话
-    addMessage('bot', currentNode.value.text);
+    sendBotMessages(currentNode.value.text);
 
     const formatTimestamp = (timestamp: Date) => {
       const options: Intl.DateTimeFormatOptions = {
