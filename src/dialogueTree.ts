@@ -1,12 +1,12 @@
 export interface DialogueNode {
     id: string;
-    text: string[]; // 由字符串数组表示的多句回复
+    text: string[];
     options?: DialogueOption[];
     next?: string;
 }
 
 export interface DialogueOption {
-    text: string;
+    text: string[]; // 将 text 修改为字符串数组
     nextId: string;
 }
 
@@ -15,16 +15,16 @@ const dialogueTree: Record<string, DialogueNode> = {
         id: 'root',
         text: ['Hello, adventurer!', 'What brings you here?'],
         options: [
-            { text: 'I am here for a quest.', nextId: 'quest' },
-            { text: 'Just passing by.', nextId: 'passBy' },
+            { text: ['Hello.', 'I am here for a quest.'], nextId: 'quest' },
+            { text: ['Just passing by.'], nextId: 'passBy' },
         ],
     },
     quest: {
         id: 'quest',
         text: ['A quest, you say?', 'What kind of quest?'],
         options: [
-            { text: 'A dangerous one.', nextId: 'dangerousQuest' },
-            { text: 'A simple task.', nextId: 'simpleQuest' },
+            { text: ['A dangerous one.'], nextId: 'dangerousQuest' },
+            { text: ['A simple task.'], nextId: 'simpleQuest' },
         ],
     },
     passBy: {

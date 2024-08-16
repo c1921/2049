@@ -10,6 +10,12 @@
           <div class="chat-message-time">{{ formatTimestamp(message.timestamp) }}</div>
           <div class="chat-message-body">{{ message.text }}</div>
         </div>
+        <!-- 等待动画，仅在NPC回复时显示 -->
+        <div v-if="isWaiting && !isUserSending" class="waiting-dots">
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
       </div>
     </div>
     <div v-if="currentNode.options" class="options-box">
@@ -20,7 +26,7 @@
           class="button is-primary"
           @click="selectOption(option)"
         >
-          {{ option.text }}
+          {{ option.text[0] }} <!-- 显示选项的第一句以代表整个选项 -->
         </button>
       </div>
     </div>
@@ -35,6 +41,10 @@ export default defineComponent({
   setup() {
     const messages = ref<{ id: number; sender: string; text: string; timestamp: Date }[]>([]);
     const currentNode = ref<DialogueNode>(dialogueTree['root']);
+    const isWaiting = ref(false);
+    const isUserSending = ref(false);
+    const typingSpeed = 5; // 假设打字速度为每秒5个字符
+    const userMessageDelay = 500; // 玩家消息的固定延迟
 
     const addMessage = (sender: string, text: string) => {
       messages.value.push({
@@ -45,39 +55,56 @@ export default defineComponent({
       });
     };
 
-    const sendBotMessages = (texts: string[], callback?: () => void) => {
-      texts.forEach((text, index) => {
-        setTimeout(() => {
-          addMessage('bot', text);
-          if (callback && index === texts.length - 1) {
-            callback();
-          }
-        }, index * 1000); // 每句间隔1秒
+    const sendMessages = (
+      texts: string[],
+      sender: string,
+      callback?: () => void,
+      constantDelay = false
+    ) => {
+      isWaiting.value = sender === 'bot'; // 仅在NPC消息发送时显示动画
+      isUserSending.value = sender === 'user';
+
+      texts.reduce((promiseChain, text, index) => {
+        const delay = constantDelay ? userMessageDelay : (text.length / typingSpeed) * 1000;
+        return promiseChain.then(() => {
+          return new Promise<void>((resolve) => {
+            setTimeout(() => {
+              addMessage(sender, text);
+              resolve();
+              if (callback && index === texts.length - 1) {
+                callback();
+              }
+            }, delay);
+          });
+        });
+      }, Promise.resolve()).then(() => {
+        isWaiting.value = false;
+        isUserSending.value = false;
       });
     };
 
     const selectOption = (option: DialogueOption) => {
-      addMessage('user', option.text);
+      sendMessages(option.text, 'user', () => {
+        setTimeout(() => {
+          const nextNode = dialogueTree[option.nextId];
+          currentNode.value = nextNode;
 
-      setTimeout(() => {
-        const nextNode = dialogueTree[option.nextId];
-        currentNode.value = nextNode;
-
-        sendBotMessages(nextNode.text, () => {
-          // 如果没有选项并且有next属性，自动跳转到下一个节点
-          if (!nextNode.options && nextNode.next) {
-            setTimeout(() => {
-              const nextNextNode = dialogueTree[nextNode.next as string];
-              currentNode.value = nextNextNode;
-              sendBotMessages(nextNextNode.text);
-            }, 1000);
-          }
-        });
-      }, 1000);
+          sendMessages(nextNode.text, 'bot', () => {
+            // 如果没有选项并且有next属性，自动跳转到下一个节点
+            if (!nextNode.options && nextNode.next) {
+              setTimeout(() => {
+                const nextNextNode = dialogueTree[nextNode.next as string];
+                currentNode.value = nextNextNode;
+                sendMessages(nextNextNode.text, 'bot');
+              }, 1000);
+            }
+          });
+        }, 1000);
+      }, true); // 传入 true 以使用固定延迟
     };
 
     // 初始化对话
-    sendBotMessages(currentNode.value.text);
+    sendMessages(currentNode.value.text, 'bot');
 
     const formatTimestamp = (timestamp: Date) => {
       const options: Intl.DateTimeFormatOptions = {
@@ -94,6 +121,8 @@ export default defineComponent({
       currentNode,
       selectOption,
       formatTimestamp,
+      isWaiting,
+      isUserSending,
     };
   },
 });
@@ -169,5 +198,45 @@ export default defineComponent({
 .button {
   flex: 1;
   margin: 0.25rem;
+}
+
+/* 等待动画样式 */
+.waiting-dots {
+  display: flex;
+  justify-content: flex-start; /* 修改为靠左对齐 */
+  align-items: center;
+  margin-top: 10px;
+  height: 20px;
+  padding-left: 1rem; /* 添加左边距使其与消息内容对齐 */
+}
+
+.waiting-dots div {
+  width: 8px;
+  height: 8px;
+  margin: 0 4px;
+  background-color: #888;
+  border-radius: 50%;
+  animation: waitingBounce 1.4s infinite both;
+}
+
+.waiting-dots div:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.waiting-dots div:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.waiting-dots div:nth-child(3) {
+  animation-delay: 0s;
+}
+
+@keyframes waitingBounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
 }
 </style>
