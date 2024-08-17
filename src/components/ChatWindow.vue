@@ -14,11 +14,11 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted, PropType } from 'vue';
-import { DialogueNode } from '../types';
+import { DialogueNode } from '../dialogues/types';
 import MessagesList from './MessagesList.vue';
 import OptionsBox from './OptionsBox.vue';
 import WaitingDots from './WaitingDots.vue';
-import { useChat } from '../useChat';
+import { useChat } from '../hooks/useChat';
 import dialogueAlice from '../dialogues/dialogueAlice';
 import dialogueBob from '../dialogues/dialogueBob';
 

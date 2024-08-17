@@ -89,7 +89,7 @@ def format_to_js_object_with_wrapper(obj):
     js_object_str = format_to_js_object(obj)
 
     # Add fixed content at the beginning and end
-    wrapper_start = "import { DialogueNode } from '../types';\n\nconst dialogueAlice: Record<string, DialogueNode> = {\n"
+    wrapper_start = "import { DialogueNode } from './types';\n\nconst dialogueAlice: Record<string, DialogueNode> = {\n"
     wrapper_end = "\n};\n\nexport default dialogueAlice;"
 
     return wrapper_start + js_object_str + wrapper_end

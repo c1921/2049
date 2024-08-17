@@ -15,7 +15,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { DialogueOption } from '../types';
+import { DialogueOption } from '../dialogues/types';
 
 export default defineComponent({
   props: {

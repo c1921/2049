@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { DialogueNode } from './types';
+import { DialogueNode } from '../dialogues/types';
 
 export function useChat(dialogueTree: Record<string, DialogueNode>) {
     const messages = ref<{ id: number; sender: string; text: string; timestamp: Date }[]>([]);

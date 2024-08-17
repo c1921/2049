@@ -1,4 +1,4 @@
-import { DialogueNode } from '../types';
+import { DialogueNode } from './types';
 
 const dialogueBob: Record<string, DialogueNode> = {
     root: {

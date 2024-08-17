@@ -1,4 +1,4 @@
-import { DialogueNode } from '../types';
+import { DialogueNode } from './types';
 
 const dialogueAlice: Record<string, DialogueNode> = {
 
