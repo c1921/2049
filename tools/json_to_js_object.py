@@ -122,7 +122,7 @@ def process_files_in_directory(input_dir, output_dir):
 if __name__ == "__main__":
     # 定义输入文件夹和输出文件夹
     input_dir = 'original_content'
-    output_dir = os.path.join('src', 'components')
+    output_dir = os.path.join('src', 'dialogues')
 
     # 处理目录中的所有 .canvas 文件
     process_files_in_directory(input_dir, output_dir)
