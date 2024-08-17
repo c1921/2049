@@ -1,6 +1,7 @@
 import os
 import json
 import re
+import sys
 
 def convert_nodes_to_target_format(data):
     nodes = data.get("nodes", [])
@@ -82,7 +83,14 @@ def format_to_js_object(obj):
         return f'"{key}":'
     
     js_object_str = re.sub(r'\"(\w+)\":', replace_key_quotes, json_str)
-    return js_object_str[1:-1]  # Remove the outermost {}
+
+    # Split the string into lines, add commas to the end of each node definition
+    lines = js_object_str.splitlines()
+    for i in range(len(lines)):
+        if lines[i].strip().endswith("}") and i < len(lines) - 1:
+            lines[i] += ","
+
+    return "\n".join(lines)[1:-1]  # Remove the outermost {}
 
 def format_to_js_object_with_wrapper(obj):
     """Format a Python dictionary to a JS-like object string with additional fixed content."""
@@ -120,9 +128,9 @@ def process_files_in_directory(input_dir, output_dir):
                 f.write(js_object_str_with_wrapper)
 
 if __name__ == "__main__":
-    # 定义输入文件夹和输出文件夹
-    input_dir = 'original_content'
-    output_dir = os.path.join('src', 'dialogues')
+    # 获取从命令行传递的输入和输出路径
+    input_dir = sys.argv[1]
+    output_dir = sys.argv[2]
 
     # 处理目录中的所有 .canvas 文件
     process_files_in_directory(input_dir, output_dir)

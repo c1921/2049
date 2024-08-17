@@ -1,44 +1,91 @@
 import { DialogueNode } from './types';
 
 const dialogueAlice: Record<string, DialogueNode> = {
-    root: {
-        id: 'root',
-        text: ['Hi, I am Alice!', 'How can I help you today?'],
-        options: [
-            { text: ['Tell me about yourself.'], nextId: 'checkCondition' },
-            { text: ['Just saying hi!'], nextId: 'hi' },
+
+    d911bfce90df4c1c: {
+        id: "d911bfce90df4c1c",
+        text: [
+            "222"
         ],
+        options: [
+            {
+                text: [
+                    "ccc"
+                ],
+                nextId: "276ec99e5cde8bb5"
+            },
+        ]
     },
-    about: {
-        id: 'about',
-        text: ['I am a software engineer.', 'I love coding!'],
-        next: 'root',
+    cec84343b6b64948: {
+        id: "cec84343b6b64948",
+        text: [
+            "666"
+        ],
+        options: []
     },
-    no: {
-        id: 'no',
-        text: ['No.'],
-        next: 'root',
+    ce021a35a58a5bf9: {
+        id: "ce021a35a58a5bf9",
+        text: [
+            "no"
+        ],
+        options: []
     },
-    checkCondition: {
-        id: 'checkCondition',
+    "4419f916be0423d9": {
+        id: "4419f916be0423d9",
+        text: [
+            "777"
+        ],
+        options: []
+    },
+    "26b63112c720df19": {
+        id: "26b63112c720df19",
+        text: [
+            "333"
+        ],
+        options: [
+            {
+                text: [
+                    "ddd"
+                ],
+                nextId: "4419f916be0423d9"
+            },
+        ]
+    },
+    root: {
+        id: "root",
+        text: [
+            "111"
+        ],
+        options: [
+            {
+                text: [
+                    "aaa"
+                ],
+                nextId: "d911bfce90df4c1c"
+            },
+            {
+                text: [
+                    "bbb"
+                ],
+                nextId: "26b63112c720df19"
+            },
+        ]
+    },
+
+"276ec99e5cde8bb5": {
+        id: "276ec99e5cde8bb5",
         text: [],
-        options: [], // 临时占位符
-        next: '', // 由条件逻辑决定
+        next: "",
         conditions: [
             {
                 check: (conditionValue: number) => conditionValue === 1,
-                nextId: 'about',
+                nextId: "cec84343b6b64948"
             },
             {
                 check: (conditionValue: number) => conditionValue !== 1,
-                nextId: 'no',
-            },
-        ],
-    },
-    hi: {
-        id: 'hi',
-        text: ['Hello! Nice to meet you.'],
-        next: 'root',
+                nextId: "ce021a35a58a5bf9"
+            }
+        ]
     },
 };
 
