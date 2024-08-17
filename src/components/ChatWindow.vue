@@ -19,8 +19,8 @@ import MessagesList from './MessagesList.vue';
 import OptionsBox from './OptionsBox.vue';
 import WaitingDots from './WaitingDots.vue';
 import { useChat } from '../useChat';
-import dialogueAlice from '../dialogueAlice';
-import dialogueBob from '../dialogueBob';
+import dialogueAlice from '../dialogues/dialogueAlice';
+import dialogueBob from '../dialogues/dialogueBob';
 
 export default defineComponent({
   components: {
