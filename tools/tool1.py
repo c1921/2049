@@ -23,7 +23,7 @@ def convert_nodes_to_target_format(data):
 
     for node in nodes:
         node_id = node["id"]
-        text_lines = node["text"].split("\n\n")
+        text_lines = [line for line in node["text"].split("\n\n") if line.strip()]  # 去除空行和多余空白
         color = node.get("color", "")
 
         # 如果是带 color: "5" 的节点，则跳过，稍后处理为 options
@@ -43,7 +43,7 @@ def convert_nodes_to_target_format(data):
         for edge in outgoing_edges:
             to_node_id = edge["toNode"]
             to_node = node_map[to_node_id]
-            to_node_text = to_node["text"].split("\n\n")[0]  # 使用目标节点的第一个文本作为选项
+            to_node_text = [line for line in to_node["text"].split("\n") if line.strip()]  # 去除空行和多余空白
 
             if to_node.get("color", "") == "5":
                 # 如果目标节点是带 color: "5" 的，处理为选项
@@ -51,7 +51,7 @@ def convert_nodes_to_target_format(data):
                 if option_edges:
                     option_next_id = option_edges[0]["toNode"]
                     target_node["options"].append({
-                        "text": [to_node_text],
+                        "text": to_node_text,
                         "nextId": option_next_id
                     })
             else:
