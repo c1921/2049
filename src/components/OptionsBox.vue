@@ -1,10 +1,10 @@
 <template>
-  <div class="options-box">
-    <div class="buttons">
+  <div class="p-4 border-t border-base-300 flex justify-center">
+    <div class="flex flex-wrap gap-2">
       <button
         v-for="(option, index) in options"
         :key="index"
-        class="button is-primary"
+        class="btn btn-primary flex-1 m-1"
         @click="$emit('select', index)"
       >
         {{ option.text[0] }}
@@ -27,23 +27,3 @@ export default defineComponent({
   emits: ['select'],
 });
 </script>
-
-<style scoped>
-.options-box {
-  padding: 1rem;
-  border-top: 1px solid #ddd;
-  display: flex;
-  justify-content: center;
-}
-
-.buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.button {
-  flex: 1;
-  margin: 0.25rem;
-}
-</style>

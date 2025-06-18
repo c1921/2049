@@ -1,9 +1,15 @@
 <template>
-  <div class="contact-list">
-    <h1 class="title">Contacts</h1>
-    <ul>
+  <div class="h-full bg-base-100 border-r border-base-300 rounded-lg">
+    <ul class="menu bg-base-200 rounded-lg p-2">
       <li v-for="contact in contacts" :key="contact.id" @click="selectContact(contact)">
-        {{ contact.name }}
+        <a class="flex items-center p-3 hover:bg-primary hover:text-primary-content rounded-md transition-colors">
+          <span class="avatar placeholder mr-2">
+            <div class="bg-neutral-focus text-neutral-content rounded-full w-8">
+              <span>{{ contact.name.charAt(0) }}</span>
+            </div>
+          </span>
+          {{ contact.name }}
+        </a>
       </li>
     </ul>
   </div>
@@ -32,36 +38,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped>
-.contact-list {
-  max-width: 300px;
-  margin: 20px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-}
-
-.title {
-  font-size: 1.5rem;
-  margin-bottom: 10px;
-}
-
-ul {
-  list-style: none;
-  padding: 0;
-}
-
-li {
-  padding: 10px;
-  margin-bottom: 5px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-li:hover {
-  background-color: #48c774;
-  color: white;
-}
-</style>
